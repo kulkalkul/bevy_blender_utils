@@ -1,0 +1,25 @@
+[package]
+name = "bevy_blender_utils"
+version = "0.1.0"
+edition = "2021"
+description = "Bevy companion plugin for bevy_blender_utils Blender addon"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/kulkalkul/bevy_blender_utils.git"
+homepage = "https://github.com/kulkalkul/bevy_blender_utils.git"
+documentation = "https://docs.rs/bevy_blender_utils"
+readme = "README.md"
+keywords = [ "bevy", "gamedev", "asset", "blender" ]
+categories = [ "game-development" ]
+authors = [ "Bora Ülker" ]
+exclude = [ "images", "assets", "bevy_blender_utils" ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.10.0"
+serde = "1.0.154"
+serde_json = "1.0.94"
+thiserror = "1.0.39"
+
+[dev-dependencies]
+bevy = "0.10.0"
