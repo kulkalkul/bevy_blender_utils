@@ -2,21 +2,18 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::prelude::shape::Cube;
 use serde::Deserialize;
-use bevy_blender_utils::{BBUManager, BBUPlugin, BBUSceneSpawnedEventWithId};
+use bevy_blender_utils::{BBUManager, BBUPlugin, BBUSceneSpawnedEventWithId, SceneId};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         // SceneId can be () unit-type if no identifier is needed.
-        .add_plugin(BBUPlugin::<SceneId>::default())
+        .add_plugins(BBUPlugin::<Scenes>::default())
         // Need to register type as scene requires it. I'm not sure if this has any implication
         // in this case.
         .register_type::<ShootingSquare>()
-        .add_startup_system(build_camera_and_lights)
-        .add_startup_system(load_assets)
-        .add_system(spawn_bbu_assets)
-        .add_system(periodic_spawn)
-        .add_system(move_squares)
+        .add_systems(Startup, (build_camera_and_lights, load_assets))
+        .add_systems(Update, (spawn_bbu_assets, periodic_spawn, move_squares))
         .run();
 }
 
@@ -35,9 +32,11 @@ enum SceneObjects {
 // Creating a scene id isn't required for this example. Still, it can categorize different scenes
 // and have id-dependent logic on the same data.
 #[derive(Copy, Clone)]
-enum SceneId {
+enum Scenes {
     MainScene
 }
+
+impl SceneId for Scenes {}
 
 fn build_camera_and_lights(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
@@ -57,12 +56,12 @@ fn build_camera_and_lights(mut commands: Commands) {
 }
 
 fn load_assets(
-    mut bbu_manager: ResMut<BBUManager<SceneId>>,
+    mut bbu_manager: ResMut<BBUManager<Scenes>>,
     asset_server: Res<AssetServer>,
 ) {
     // Add a handle to our scene with the id we want to use. Id can be () unit-type.
     // .blend file and .gltf file can also be found on /assets.
-    bbu_manager.manage(SceneId::MainScene, asset_server.load("shooting_squares.glb#Scene0"));
+    bbu_manager.manage(Scenes::MainScene, asset_server.load("shooting_squares.glb#Scene0"));
 }
 
 // The component that we are going to insert into the scene. It needs to derive reflect because of
@@ -85,7 +84,7 @@ struct SpawnedSquare;
 
 fn spawn_bbu_assets(
     mut commands: Commands,
-    mut reader: EventReader<BBUSceneSpawnedEventWithId<SceneId>>,
+    mut reader: EventReader<BBUSceneSpawnedEventWithId<Scenes>>,
     mut scenes: ResMut<Assets<Scene>>,
 ) {
     for event in reader.iter() {
@@ -94,7 +93,7 @@ fn spawn_bbu_assets(
         let scene = &mut scene;
 
         match scene.id {
-            SceneId::MainScene => scene.parse::<SceneObjects, _>(|commands, entity, _name, data| {
+            Scenes::MainScene => scene.parse::<SceneObjects, _>(|commands, entity, _name, data| {
                 // More error handling.
                 let Ok(data) = data else { return; };
                 // This isn't an error and can be used because not all scenes require extra data.

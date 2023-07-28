@@ -9,6 +9,8 @@ mod bbu_manager;
 
 pub use bbu_manager::{BBUManager, BBUSceneSpawnedEvent, BBUSceneSpawnedEventWithId};
 
+pub trait SceneId: Copy + Clone + Send + Sync + 'static {}
+
 /// Id allows for different parsing logic to work on scenes if needed.
 pub struct BBUPlugin<Id> {
     _phantom: PhantomData<Id>,
@@ -22,16 +24,16 @@ impl<Id> Default for BBUPlugin<Id> {
     }
 }
 
-impl<Id: Copy + Clone + Event + 'static> Plugin for BBUPlugin<Id> {
+impl<Id: SceneId> Plugin for BBUPlugin<Id> {
     fn build(&self, app: &mut App) {
         app
             .add_event::<BBUSceneSpawnedEventWithId<Id>>()
             .init_resource::<BBUManager<Id>>()
-            .add_system(inform_if_loaded_system::<Id>);
+            .add_systems(Update, inform_if_loaded_system::<Id>);
     }
 }
 
-fn inform_if_loaded_system<Id: Copy + Clone + Event>(
+fn inform_if_loaded_system<Id: SceneId>(
     mut bbu_manager: ResMut<BBUManager<Id>>,
     asset_server: Res<AssetServer>,
     writer: EventWriter<BBUSceneSpawnedEventWithId<Id>>,

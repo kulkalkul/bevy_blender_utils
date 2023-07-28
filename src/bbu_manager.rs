@@ -2,7 +2,7 @@ use std::path::Path;
 use bevy::asset::{AssetPath, LoadState};
 use bevy::prelude::*;
 use thiserror::Error;
-use crate::BBUScene;
+use crate::{BBUScene, SceneId};
 
 /// Tracks assets that are loading and sends an event when loaded.
 #[derive(Resource)]
@@ -18,7 +18,7 @@ impl<Id> Default for BBUManager<Id> {
     }
 }
 
-impl<Id: Copy + Clone + Event> BBUManager<Id> {
+impl<Id: SceneId> BBUManager<Id> {
     /// Add scene handle to track.
     pub fn manage(&mut self, id: Id, handle: Handle<Scene>) -> Handle<Scene> {
         self.loading_assets.push(SceneWithId {
@@ -80,6 +80,7 @@ struct SceneWithId<Id> {
 }
 
 /// Event of a loaded scene asset can also be used with custom logic.
+#[derive(Event)]
 pub enum BBUSceneSpawnedEventWithId<Id> {
     Loaded {
         id: Id,
@@ -91,7 +92,7 @@ pub enum BBUSceneSpawnedEventWithId<Id> {
     },
 }
 
-impl<Id: Copy + Clone + Event> BBUSceneSpawnedEventWithId<Id> {
+impl<Id: SceneId> BBUSceneSpawnedEventWithId<Id> {
     /// Convenience method for parsing events and getting scenes from them.
     pub fn parse<'a>(
         &'a self,

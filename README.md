@@ -45,6 +45,7 @@ Addon can be used with library override, which is **awesome**. Please open an is
 
 | Bevy Version | Crate Version | Plugin Version |
 |--------------|---------------|----------------|
+| `0.11`       | `0.2`         | `0.1`          |
 | `0.10`       | `0.1`         | `0.1`          |
 
 ## Blender Compatibility
